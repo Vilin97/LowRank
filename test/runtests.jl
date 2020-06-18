@@ -1,6 +1,5 @@
 using LowRank, Test
 
-@testset "LowRank.jl" begin
-    @test 1+1 == 2
-    @test 1+2 == 3
+@time begin
+  @time @testset "Uniform 2d" begin include("uniform2d.jl") end
 end
