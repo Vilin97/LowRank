@@ -6,6 +6,6 @@ using Combinatorics, LinearAlgebra
 
 include("low_rank_subset.jl")
 
-export find_low_rank_subset_checkall
+export find_low_rank_subset_checkall, find_low_rank_subset_sample_rep
 
 end # module
