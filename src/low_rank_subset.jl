@@ -18,14 +18,3 @@ function find_low_rank_subset_sample_rep(data_set,n,k)
     end
     minimum(f, powerset(1:length(data_set), k, k))
 end
-
-for (epsilon, k) in Iterators.product(0.0:0.01:0.2, 1.0:0.01:1.5)
-    e_1_s_1 = 3 + epsilon^2
-    e_2_s_1 = 2
-    e_1_s_2 = k^2(3 + 4*epsilon^2)
-    e_2_s_2 = 2k
-
-    if xor(e_1_s_1 < e_1_s_2, e_2_s_1 < e_2_s_2) &&  e_1_s_1 != e_1_s_2 && e_2_s_1 != e_2_s_2
-        println("(k, epsilon) = ($k, $epsilon), $e_1_s_1, $e_1_s_2, $e_2_s_1, $e_2_s_2")
-    end
-end
