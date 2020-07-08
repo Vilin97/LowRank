@@ -15,7 +15,9 @@ function error_2_norm(svd_object, original_matrix)
     norm(original_matrix - combine_svd(svd_object))
 end
 
+"Returns (indices, elements)"
 findmax(v::AbstractArray,k::AbstractUnitRange; opts...) = findpartialsort(v,k; opts..., rev=true)
+"Returns (indices, elements)"
 findmin(v::AbstractArray,k::AbstractUnitRange; opts...) = findpartialsort(v,k; opts...)
 
 function findpartialsort(v,k; opts...)
@@ -29,14 +31,14 @@ function sample(X, n, k)
     err, S = find_n_closest_pts(X, U, n)
 end
 
-"perform one step: compute principal vectors U and find n closest points. Return sum of errors and new set"
+"perform one step: find n closest points and compute principal vectors. Return error, indices, new set S, and SVD"
 function step(X, U, n, k)
-    err, S = find_n_closest_pts(X, U, n)
-    svd = truncated_svd(hcat(S...), k)
-    return error_2_norm(svd, )
+    indices, S = find_n_closest_pts(X, U, n)
+    err, svd = truncated_svd(hcat(S...), k)
+    return err, indices, S, svd
 end
 
-"Return n points from X closest to the span of U and their distances"
+"return n points from X closest to the span of U and their distances. Returns (indices, elements)"
 find_n_closest_pts(X, U, n) = findmin([distance_squared(x, U) for x in X], 1:n)
 
 "return square of length of projection of v onto the span of U, where columns of U are orthonormal"
