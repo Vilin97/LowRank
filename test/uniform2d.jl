@@ -1,16 +1,16 @@
 using LowRank
-using Plots
+# using Plots
 using JLD, Test
 
 # rank 1
-ds = load(joinpath(@__DIR__, "..","datasets", "uniform_2d_10_pts.jld"))
-V, (err, indices) = ds["data"], ds["size4_rank1"]
+file = load(joinpath(@__DIR__, "..","datasets", "uniform_2d_10_pts.jld"))
+data_set, (err, indices) = file["data"], file["size4_rank1"]
 k = 1
 n = 4
 
-@test find_low_rank_subset_checkall(V,n,k) == (err, indices)
-@test find_low_rank_subset_sample_rep(V,n,k)[1] <= 4*err
-
+@test find_low_rank_subset_checkall(data_set,n,k) == (err, indices)
+@test find_low_rank_subset_sample_rep(data_set,n,k)[1] <= 4*err
+@test find_low_rank_subset_iterative(data_set, n, k) != nothing
 # PLotting
 # p = scatter([Tuple(x) for x in V], label = "all points")
 # scatter!(p, [Tuple(V[i]) for i in indices], label = "optimal points")

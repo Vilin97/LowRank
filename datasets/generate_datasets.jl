@@ -16,15 +16,14 @@ end
 # @test ds == load("datasets/uniform_2d_10_pts.jld")["data"]
 
 # A = UV plus N - n columns, where U is d×k, and V is k×n
-d = 2
-k = 1
-n = 10
 N = 30
+d = 2
+n = 10
+k = 1
 
 A = zeros(d, N)
 U = rand(d, k)
 V = rand(k, n)
 A[:, 1:n] = U*V
 A[:, n+1:N] = rand(d, N-n)
-# using Plots
-# scatter(@view(A[1,:]), @view(A[2,:]))
+save("datasets/N_$(N)_d_$(d).jld", "data", A, "n_$(n)_k_$(k)", (0.0, collect(1:n)))

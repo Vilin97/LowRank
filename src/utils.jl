@@ -25,24 +25,18 @@ function findpartialsort(v,k; opts...)
     length(inds) == 1 ? (inds,v[inds]) : (inds,v[[inds...]])
 end
 
-"sample n points from X by sampling k points randomly and selecting n-k points closest to the span on the first k"
-function sample(X, n, k)
-    U = hcat(sample(X, k))
-    err, S = find_n_closest_pts(X, U, n)
-end
-
-"perform one step: find n closest points and compute principal vectors. Return error, indices, new set S, and SVD"
-function step(X, U, n, k)
+"perform one step: find n closest points and compute principal vectors. Return (error, indices, SVD)"
+function step(X, U, n :: Integer, k :: Integer)
     indices, S = find_n_closest_pts(X, U, n)
     err, svd = truncated_svd(hcat(S...), k)
-    return err, indices, S, svd
+    return err, indices, svd
 end
 
 "return n points from X closest to the span of U and their distances. Returns (indices, elements)"
 find_n_closest_pts(X, U, n) = findmin([distance_squared(x, U) for x in X], 1:n)
 
-"return square of length of projection of v onto the span of U, where columns of U are orthonormal"
-projection_squared(v, U) = mapreduce(u->dot(v,u)^2 , +, eachcol(U))
-
 "return square of distance from v to span of U, where columns of U are orthonormal"
 distance_squared(v, U) = dot(v,v) - projection_squared(v, U)
+
+"return square of length of projection of v onto the span of U, where columns of U are orthonormal"
+projection_squared(v, U) = mapreduce(u->dot(v,u)^2 , +, eachcol(U))
