@@ -22,16 +22,19 @@ function find_low_rank_subset_sample_rep(data_set,n,k)
     minimum(f, powerset(1:length(data_set), k, k))
 end
 
+"""
+A struct to store the current approximation error, the current indices and the current principal vectors
+"""
 struct Trajectory
     error :: Float64
     indices :: Array{Int,1}
-    principal_components :: Array{Float64,2}
+    principal_vectors :: Array{Float64,2}
 end
 
 """
 Return an array of trajectories for each iteration step
 """
-function find_low_rank_subset_iterative(data_set, n, k, num_trajectories = 5, num_iterations = 5, convergence_threshold = 0.01)
+function find_low_rank_subset_iterative(data_set, n, k, num_trajectories = 5, num_iterations = 50, convergence_threshold = 0.001)
     trajectories = Array{Trajectory,1}(undef, num_trajectories)
     all_trajectories = Array{Trajectory,1}[]
     sizehint!(all_trajectories, num_iterations)
@@ -43,16 +46,20 @@ function find_low_rank_subset_iterative(data_set, n, k, num_trajectories = 5, nu
     push!(all_trajectories, trajectories)
 
     converged = false
+    converged_trajectory = all_trajectories[1]
     for i in 1:num_iterations
         for (t, traj) in enumerate(trajectories)
-            trajectories[t] = Trajectory(step(data_set, traj.U, n, k))
+            error, indices, svd = step(data_set, traj.principal_vectors, n, k)
+            trajectories[t] = Trajectory(error, indices, svd.U)
             if abs(traj.error - trajectories[t].error) < convergence_threshold
                 converged = true
+                converged_trajectory = traj
                 println("converged in $i steps. Error = $(trajectories[t].error)")
+                break
             end
         end
         push!(all_trajectories, trajectories)
         converged && break
     end
-    return all_trajectories
+    return converged_trajectory, all_trajectories
 end

@@ -33,7 +33,10 @@ function step(X, U, n :: Integer, k :: Integer)
 end
 
 "return n points from X closest to the span of U and their distances. Returns (indices, elements)"
-find_n_closest_pts(X, U, n) = findmin([distance_squared(x, U) for x in X], 1:n)
+function find_n_closest_pts(X, U, n)
+    indices, _ = findmin([distance_squared(x, U) for x in X], 1:n)
+    indices, X[indices]
+end
 
 "return square of distance from v to span of U, where columns of U are orthonormal"
 distance_squared(v, U) = dot(v,v) - projection_squared(v, U)
