@@ -32,34 +32,37 @@ struct Trajectory
 end
 
 """
-Return an array of trajectories for each iteration step
+Return an array of current_trajectories for each iteration step
 """
-function find_low_rank_subset_iterative(data_set, n, k, num_trajectories = 5, num_iterations = 50, convergence_threshold = 0.001)
-    trajectories = Array{Trajectory,1}(undef, num_trajectories)
+function find_low_rank_subset_iterative(data_set, n, k, num_trajectories = 100, num_iterations = 50, convergence_threshold = 0.001, verbose = false)
+    current_trajectories = Array{Trajectory,1}(undef, num_trajectories)
     all_trajectories = Array{Trajectory,1}[]
     sizehint!(all_trajectories, num_iterations)
     for t in 1:num_trajectories
         U = hcat(sample(data_set, k)...)
         error, indices, svd = step(data_set, U, n, k)
-        trajectories[t] = Trajectory(error, indices, svd.U)
+        current_trajectories[t] = Trajectory(error, indices, svd.U)
     end
-    push!(all_trajectories, trajectories)
+    push!(all_trajectories, current_trajectories)
 
     converged = false
-    converged_trajectory = all_trajectories[1]
+    best_trajectory = all_trajectories[1]
     for i in 1:num_iterations
-        for (t, traj) in enumerate(trajectories)
+        for (t, traj) in enumerate(current_trajectories)
             error, indices, svd = step(data_set, traj.principal_vectors, n, k)
-            trajectories[t] = Trajectory(error, indices, svd.U)
-            if abs(traj.error - trajectories[t].error) < convergence_threshold
+            current_trajectories[t] = Trajectory(error, indices, svd.U)
+            if abs(traj.error - current_trajectories[t].error) < convergence_threshold
                 converged = true
-                converged_trajectory = traj
-                println("converged in $i steps. Error = $(trajectories[t].error)")
-                break
             end
         end
-        push!(all_trajectories, trajectories)
-        converged && break
+        push!(all_trajectories, current_trajectories)
+        if converged
+            best_trajectory = current_trajectories[findmin((x -> x.error).(current_trajectories))[2]]
+            verbose && println("converged in $i steps. Error = $(best_trajectory.error)")
+            break
+        end
     end
-    return converged_trajectory, all_trajectories
+    return best_trajectory, all_trajectories
 end
+
+findmin(abs.([6,-5]))
