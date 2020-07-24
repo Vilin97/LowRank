@@ -22,5 +22,5 @@ data_set = collect(eachcol(A))
 # k = 2
 
 # @time @test find_low_rank_subset_checkall(data_set,n,k) == (err, indices)
-@time @test find_low_rank_subset_sample_rep(data_set,n,k)[1] <= error + 0.0001
-@time @test find_low_rank_subset_iterative(data_set, n, k)[1].error <= error + 0.0001
+@test find_low_rank_subset_sample_rep(data_set,n,k)[1] <= error + 0.0001
+@test find_low_rank_subset_iterative(data_set, n, k)[1].error <= error + 0.0001
