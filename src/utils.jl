@@ -1,7 +1,6 @@
 """
 File with helper functions
 """
-import Base.findmin, Base.findmax
 
 "return U, S, Vt truncated to rank k and the error ||M - M_k||^2"
 function truncated_svd(M, k)

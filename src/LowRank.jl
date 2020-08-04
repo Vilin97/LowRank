@@ -4,7 +4,9 @@ __precompile__()
 Module for identifying low-rank subsets and subgraphs
 """
 module LowRank
-using Combinatorics, LinearAlgebra, StatsBase
+using Combinatorics, LinearAlgebra, StatsBase, Parameters
+import Base.show
+import Base.findmin, Base.findmax
 
 include("utils.jl")
 include("trajectory.jl")
@@ -15,6 +17,7 @@ export find_low_rank_subset_checkall, find_low_rank_subset_sample_rep, FastLowRa
 end # module
 
 # TODO:
+# allow for maximization of ∑ σᵢ² for i ≦ k instead of ∑ σᵢ² for i ≧ k+1
 # allow for normalization in FastLowRank
 # write a test that introduces Gaussian noise to each entry
 # write spatial methods
