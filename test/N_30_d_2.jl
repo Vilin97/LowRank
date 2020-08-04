@@ -1,7 +1,7 @@
 using LowRank, Test
 # using Plots
 # using JLD
-using Random, Distributions, LinearAlgebra
+# using Random, Distributions, LinearAlgebra
 
 N = 30
 d = 2
@@ -23,8 +23,8 @@ data_set = collect(eachcol(A))
 # k = 1
 
 # @time @test find_low_rank_subset_checkall(data_set,n,k) == (err, indices)
-@test find_low_rank_subset_sample_rep(data_set,n,k)[1] <= err + 0.0001
-@test find_low_rank_subset_iterative(data_set, n, k)[1].error <= err + 0.0001
+@test find_low_rank_subset_sample_rep(data_set,n,k)[1] <= 4*err + 0.0001
+@test FastLowRank(data_set, n, k).error <= err + 0.0001
 
 # PLotting
 # p = scatter([Tuple(x) for x in V], label = "all points")

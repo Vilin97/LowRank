@@ -1,6 +1,6 @@
 using LowRank, Test
 # using JLD
-using Random, Distributions, LinearAlgebra
+# using Random, Distributions, LinearAlgebra
 
 N = 50
 d = 5
@@ -22,5 +22,5 @@ data_set = collect(eachcol(A))
 # k = 2
 
 # @time @test find_low_rank_subset_checkall(data_set,n,k) == (err, indices)
-@test find_low_rank_subset_sample_rep(data_set,n,k)[1] <= error + 0.0001
-@test find_low_rank_subset_iterative(data_set, n, k)[1].error <= error + 0.0001
+@test find_low_rank_subset_sample_rep(data_set,n,k)[1] <= 4*error + 0.0001
+@test FastLowRank(data_set, n, k).error <= error + 0.0001

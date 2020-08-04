@@ -1,6 +1,6 @@
 """
 Return (error, indices) for the subset of size n, whose k-rank approximation has lowest error, as measured by the 2-norm.
-Checks all subsets of size n. Has comlpexity Ω(V^n).
+Checks all subsets of size n. Has complexity Ω(|data_set|^n).
 """
 function find_low_rank_subset_checkall(data_set,n,k)
     f(S) = let M = hcat([data_set[i] for i in S]...);
@@ -10,7 +10,7 @@ end
 
 """
 Return (error, indices) for the subset of size n, whose k-rank approximation with vectors from data set has lowest error, as measured by the 2-norm.
-Checks all subsets of size k. Has comlpexity Ω(V^k).
+Checks all subsets of size k. Has comlpexity Ω(|data_set|^k).
 """
 function find_low_rank_subset_sample_rep(data_set,n,k)
     f(E) = let M = hcat([data_set[i] for i in E]...);
@@ -22,47 +22,50 @@ function find_low_rank_subset_sample_rep(data_set,n,k)
     minimum(f, powerset(1:length(data_set), k, k))
 end
 
+# TODO: allow the user to provide partial or complete initializations to seed the alg
 """
-A struct to store the current approximation error, the current indices and the current principal vectors
+Return an array of current_trajectories for each iteration step.
 """
-struct Trajectory
-    error :: Float64
-    indices :: Array{Int,1}
-    principal_vectors :: Array{Float64,2}
-end
+function FastLowRank(data_set, n, k; initial_vectors = [], step = L2_step, num_trajectories = 100, num_iterations = 50, convergence_threshold = 0.001, verbose = false)
+    current_trajectories = Vector{Trajectory}(undef, num_trajectories)
+    # all_trajectories = Vector{Vector{Trajectory}}(undef, num_iterations)
 
-"""
-Return an array of current_trajectories for each iteration step
-"""
-function find_low_rank_subset_iterative(data_set, n, k, num_trajectories = 100, num_iterations = 50, convergence_threshold = 0.001, verbose = false)
-    current_trajectories = Array{Trajectory,1}(undef, num_trajectories)
-    all_trajectories = Array{Trajectory,1}[]
-    sizehint!(all_trajectories, num_iterations)
+    # initialize
     for t in 1:num_trajectories
-        U = hcat(sample(data_set, k)...)
-        error, indices, svd = step(data_set, U, n, k)
-        current_trajectories[t] = Trajectory(error, indices, svd.U)
+        if t <= length(initial_vectors)
+            current_trajectories[t] = Trajectory(data_set, n, k, initial_vectors[t])
+        else
+            current_trajectories[t] = Trajectory(data_set, n, k)
+        end
     end
-    push!(all_trajectories, current_trajectories)
+    # all_trajectories[1] = current_trajectories
 
-    converged = false
-    best_trajectory = all_trajectories[1]
+    # do iterations
+    is_converged = [false for i in 1:num_trajectories]
+    best_converged_error = Inf
+    best_error = Inf
     for i in 1:num_iterations
-        for (t, traj) in enumerate(current_trajectories)
-            error, indices, svd = step(data_set, traj.principal_vectors, n, k)
-            current_trajectories[t] = Trajectory(error, indices, svd.U)
-            if abs(traj.error - current_trajectories[t].error) < convergence_threshold
-                converged = true
+        for (ind, traj) in enumerate(current_trajectories)
+            is_converged[ind] && continue
+            new_traj = step(traj)
+            best_error = min(best_error, new_traj.error)
+            if abs(traj.error - new_traj.error) < convergence_threshold
+                is_converged[ind] = true
+                best_converged_error = min(best_converged_error, new_traj.error)
             end
+            current_trajectories[ind] = new_traj
         end
-        push!(all_trajectories, current_trajectories)
-        if converged
-            best_trajectory = current_trajectories[findmin((x -> x.error).(current_trajectories))[2]]
-            verbose && println("converged in $i steps. Error = $(best_trajectory.error)")
+        # all_trajectories[i+1] = current_trajectories
+        if abs(best_error - best_converged_error) < eps(best_error)
+            verbose && println("converged in $i steps")
             break
+        elseif i == num_iterations
+            verbose && println("did not converge in $num_iterations steps")
         end
     end
-    return best_trajectory, all_trajectories
+    best_error, best_trajectory_index = findmin((x -> x.error).(current_trajectories))
+    best_trajectory = current_trajectories[best_trajectory_index]
+    rounded_error = round(best_trajectory.error, digits = length(string(convergence_threshold)))
+    verbose && println("error = $rounded_error")
+    return best_trajectory
 end
-
-findmin(abs.([6,-5]))
