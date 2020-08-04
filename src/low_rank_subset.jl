@@ -1,4 +1,8 @@
 """
+Methods to find a low-rank subset
+"""
+
+"""
 Return (error, indices) for the subset of size n, whose k-rank approximation has lowest error, as measured by the 2-norm.
 Checks all subsets of size n. Has complexity Ω(|data_set|^n).
 """
@@ -22,7 +26,6 @@ function find_low_rank_subset_sample_rep(data_set,n,k)
     minimum(f, powerset(1:length(data_set), k, k))
 end
 
-# TODO: allow the user to provide partial or complete initializations to seed the alg
 """
 Return an array of current_trajectories for each iteration step.
 """
