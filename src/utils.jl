@@ -31,3 +31,17 @@ distance_squared(v, U) = dot(v,v) - projection_squared(v, U)
 
 "return square of length of projection of v onto the span of U, where columns of U are orthonormal"
 projection_squared(v, U) = mapreduce(u->dot(v,u)^2 , +, eachcol(U))
+
+"run method on data_set num_times times. Return errors, indices, and time took for each run"
+function run_method(method, data_set, num_times)
+    errors = []
+    indicess = []
+    times = []
+    for i in 1:num_times
+        t = @elapsed error, indices = method(data_set)
+        push!(errors, error)
+        push!(indicess, sort(indices))
+        push!(times, t)
+    end
+    return errors, indicess, times
+end

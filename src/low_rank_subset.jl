@@ -12,9 +12,11 @@ function find_low_rank_subset_checkall(data_set,n,k)
     minimum(f , powerset(1:length(data_set), n, n) )
 end
 
+find_low_rank_subset_checkall(A :: Array{T, 2}, n, k) where T <: Number = find_low_rank_subset_checkall(collect(eachcol(A)), n, k)
+
 """
 Return (error, indices) for the subset of size n, whose k-rank approximation with vectors from data set has lowest error, as measured by the 2-norm.
-Checks all subsets of size k. Has comlpexity Ω(|data_set|^k).
+Checks all subsets of size k. Has complexity Ω(|data_set|^k).
 """
 function find_low_rank_subset_sample_rep(data_set,n,k)
     f(E) = let M = hcat([data_set[i] for i in E]...);
@@ -26,20 +28,21 @@ function find_low_rank_subset_sample_rep(data_set,n,k)
     minimum(f, powerset(1:length(data_set), k, k))
 end
 
+find_low_rank_subset_sample_rep(A :: Array{T, 2}, n, k) where T <: Number = find_low_rank_subset_sample_rep(collect(eachcol(A)), n, k)
+
 """
 Return an array of current_trajectories for each iteration step.
 """
-function FastLowRank(data_set, n, k; initial_vectors = [], step = L2_step, num_trajectories = 100, num_iterations = 50, convergence_threshold = 0.001, verbose = false)
+function FastLowRank(data_set, n, k; initial_indices = [], step = L2_step, num_trajectories = 100, num_iterations = 50, verbose = false)
     current_trajectories = Vector{Trajectory}(undef, num_trajectories)
     # all_trajectories = Vector{Vector{Trajectory}}(undef, num_iterations)
 
     # initialize
-    for t in 1:num_trajectories
-        if t <= length(initial_vectors)
-            current_trajectories[t] = Trajectory(data_set, n, k, initial_vectors[t])
-        else
-            current_trajectories[t] = Trajectory(data_set, n, k)
-        end
+    for t in 1:length(initial_indices)
+        current_trajectories[t] = LowRank.Trajectory(data_set, n, k, initial_indices[t])
+    end
+    for t in length(initial_indices)+1:num_trajectories
+        current_trajectories[t] = LowRank.Trajectory(data_set, n, k)
     end
     # all_trajectories[1] = current_trajectories
 
@@ -52,23 +55,24 @@ function FastLowRank(data_set, n, k; initial_vectors = [], step = L2_step, num_t
             is_converged[ind] && continue
             new_traj = step(traj)
             best_error = min(best_error, new_traj.error)
-            if abs(traj.error - new_traj.error) < convergence_threshold
+            if Set(traj.indices) == Set(new_traj.indices)
                 is_converged[ind] = true
                 best_converged_error = min(best_converged_error, new_traj.error)
             end
             current_trajectories[ind] = new_traj
         end
         # all_trajectories[i+1] = current_trajectories
-        if abs(best_error - best_converged_error) < eps(best_error)
+        if best_error - best_converged_error < eps(best_error)
             verbose && println("converged in $i steps")
             break
         elseif i == num_iterations
-            verbose && println("did not converge in $num_iterations steps")
+            verbose && println("did not converge in $i steps")
         end
     end
     best_error, best_trajectory_index = findmin((x -> x.error).(current_trajectories))
     best_trajectory = current_trajectories[best_trajectory_index]
-    rounded_error = round(best_trajectory.error, digits = length(string(convergence_threshold)))
-    verbose && println("error = $rounded_error")
-    return best_trajectory
+    verbose && println("error = $best_error")
+    return best_trajectory.error, best_trajectory.indices
 end
+
+FastLowRank(A :: Array{T, 2}, n, k; kwargs...) where T <: Number = FastLowRank(collect(eachcol(A)), n, k; kwargs...)

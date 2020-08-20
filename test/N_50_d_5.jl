@@ -23,4 +23,4 @@ data_set = collect(eachcol(A))
 
 # @time @test find_low_rank_subset_checkall(data_set,n,k) == (err, indices)
 @test find_low_rank_subset_sample_rep(data_set,n,k)[1] <= 4*error + 0.0001
-@test FastLowRank(data_set, n, k).error <= error + 0.0001
+@test FastLowRank(data_set, n, k)[1] <= error + 0.0001

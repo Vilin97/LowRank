@@ -8,6 +8,7 @@ using Combinatorics, LinearAlgebra, StatsBase, Parameters
 import Base.show
 import Base.findmin, Base.findmax
 
+include("generate_datasets.jl")
 include("utils.jl")
 include("trajectory.jl")
 include("low_rank_subset.jl")

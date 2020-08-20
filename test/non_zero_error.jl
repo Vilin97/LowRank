@@ -17,4 +17,4 @@ error, _ = LowRank.truncated_svd(A[:,1:n], k)
 data_set = collect(eachcol(A))
 
 @test find_low_rank_subset_sample_rep(data_set,n,k)[1] <= 4*error
-@test FastLowRank(data_set, n, k).error <= error + 0.0001
+@test FastLowRank(data_set, n, k)[1] <= error + 0.0001

@@ -10,7 +10,7 @@ n = 4
 
 # @test find_low_rank_subset_checkall(data_set,n,k)[1] <= err + 0.0001
 @test find_low_rank_subset_sample_rep(data_set,n,k)[1] <= 2*err + .0001
-@test FastLowRank(data_set, n, k, verbose = true).error <= err + 0.0001
+@test FastLowRank(data_set, n, k, verbose = true)[1] <= err + 0.0001
 
 FastLowRank(data_set, n, k, verbose = true, num_trajectories = 100, convergence_threshold = 0.00000001)
 

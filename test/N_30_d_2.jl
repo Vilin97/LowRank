@@ -24,7 +24,7 @@ data_set = collect(eachcol(A))
 
 # @time @test find_low_rank_subset_checkall(data_set,n,k) == (err, indices)
 @test find_low_rank_subset_sample_rep(data_set,n,k)[1] <= 4*err + 0.0001
-@test FastLowRank(data_set, n, k).error <= err + 0.0001
+@test FastLowRank(data_set, n, k)[1] <= err + 0.0001
 
 # PLotting
 # p = scatter([Tuple(x) for x in V], label = "all points")
