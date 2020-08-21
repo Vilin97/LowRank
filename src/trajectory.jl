@@ -35,8 +35,8 @@ end
 
     "pick k points from the dataset at random and pick the rest n-k points to be the closest to the span of the k random points"
     function Trajectory(data_set, n, k)
-        indices = sample(1:length(data_set), n)...)
-        Trajectory(data_set, n, k, indices)
+        principal_vectors = hcat(sample(data_set, k)...)
+        Trajectory(data_set, n, k, principal_vectors)
     end
 
     "perform one step: find n closest points and compute principal vectors. Return a new Trajectory object"
@@ -44,6 +44,21 @@ end
         @unpack data_set, n, k, principal_vectors = trajectory
         indices, S = find_n_closest_pts(data_set, principal_vectors, n)
         error, svd = truncated_svd(hcat(S...), k)
+        Trajectory(data_set, n, k, error, sort(indices), svd.U)
+    end
+
+    "perform one step: find n closest points and compute principal vectors. Return a new Trajectory object"
+    function L2_step_local(trajectory)
+        @unpack data_set, n, k, principal_vectors, indices = trajectory
+        worst_index = maximum(i -> (distance_squared(data_set[i], principal_vectors), i), indices)[2]
+        indices_minus_worst = setdiff(indices, worst_index)
+        indices_to_search = setdiff(1:length(data_set), indices_minus_worst)
+        new_ind = minimum(i -> (distance_squared(data_set[i], principal_vectors), i), indices_to_search)[2]
+        indices = union(indices_minus_worst, new_ind)
+        S = data_set[indices]
+        error, svd = truncated_svd(hcat(S...), k)
+        d1 = distance_squared( data_set[worst_index], principal_vectors)
+        d2 = distance_squared( data_set[new_ind], principal_vectors)
         Trajectory(data_set, n, k, error, sort(indices), svd.U)
     end
 

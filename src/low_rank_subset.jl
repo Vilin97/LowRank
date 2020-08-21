@@ -33,7 +33,7 @@ find_low_rank_subset_sample_rep(A :: Array{T, 2}, n, k) where T <: Number = find
 """
 Return an array of current_trajectories for each iteration step.
 """
-function FastLowRank(data_set, n, k; initial_indices = [], step = L2_step, num_trajectories = 100, num_iterations = 50, verbose = false)
+function FastLowRank(data_set, n, k; initial_indices = [], step = L2_step, num_trajectories = k*trunc(Int(length(data_set)/n)), num_iterations = 50, verbose = false)
     current_trajectories = Vector{Trajectory}(undef, num_trajectories)
     # all_trajectories = Vector{Vector{Trajectory}}(undef, num_iterations)
 
@@ -44,7 +44,6 @@ function FastLowRank(data_set, n, k; initial_indices = [], step = L2_step, num_t
     for t in length(initial_indices)+1:num_trajectories
         current_trajectories[t] = LowRank.Trajectory(data_set, n, k)
     end
-    # all_trajectories[1] = current_trajectories
 
     # do iterations
     is_converged = [false for i in 1:num_trajectories]
@@ -61,8 +60,9 @@ function FastLowRank(data_set, n, k; initial_indices = [], step = L2_step, num_t
             end
             current_trajectories[ind] = new_traj
         end
-        # all_trajectories[i+1] = current_trajectories
-        if best_error - best_converged_error < eps(best_error)
+
+        # @show best_error, best_converged_error
+        if best_converged_error - best_error < eps(best_error)
             verbose && println("converged in $i steps")
             break
         elseif i == num_iterations
