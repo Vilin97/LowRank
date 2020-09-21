@@ -4,4 +4,4 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/github/Vilin97/LowRank.jl?branch=master&svg=true)](https://ci.appveyor.com/project/Vilin97/lowrank-jl)
 [![codecov.io](https://codecov.io/gh/Vilin97/LowRank.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/Vilin97/LowRank.jl)
 
-Module for identifying low-rank subsets and subgraphs
+Module for identifying low-rank subsets and subgraphs. Go to https://github.com/Vilin97/LowRank.jl for the description of the problem and the write-up.
